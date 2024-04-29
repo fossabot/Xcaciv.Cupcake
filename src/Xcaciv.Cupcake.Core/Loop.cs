@@ -54,23 +54,26 @@ public class Loop
             commands.AddPackageDirectory(this.PackageDirectory);
             commands.LoadCommands();
         }
-        catch (Xcaciv.Command.Exceptions.NoPluginsFoundException ex)
+        catch (Xcaciv.Command.Exceptions.NoPluginsFoundException)
         {
+            context.SetStatusMessage("No Plugins Found. You may want to check out `install --help`").Wait();
             // TODO: download first plugin and GOTO start again! :D
-            throw new Exceptions.LoadingException(ex.Message, ex);
+            // throw new Exceptions.LoadingException(ex.Message, ex);
         }
         catch (Exception ex)
         {
             throw new Exceptions.LoadingException("Unable to load commands.", ex);
         }
 
+        context.SetStatusMessage("Adding Core Commands").Wait();
+        commands.AddCommand(new Command.Internal());
         context.SetStatusMessage("Done").Wait();
 
         var command = "";
         while (!this.ExitCommands.Contains(command, StringComparer.OrdinalIgnoreCase))
         {
             // run command if it was not blank
-            if (String.IsNullOrEmpty(command)) commands.Run(command, context).Wait();
+            if (!String.IsNullOrEmpty(command)) commands.Run(command, context).Wait();
             // get next command
             command = context.PromptForCommand(this.Prompt).Result;
         }    

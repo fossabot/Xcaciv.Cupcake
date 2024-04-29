@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xcaciv.command" Version="0.0.13" />
+    <PackageReference Include="Xcaciv.Command" />
   </ItemGroup>
 
 </Project>

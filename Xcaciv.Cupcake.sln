@@ -9,7 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xcaciv.Cupcake.Core", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xcaciv.Cupcake.Lit", "src\Xcaciv.Cupcake.Lit\Xcaciv.Cupcake.Lit.csproj", "{60B60FC2-C93C-4939-9832-4A964F2AE713}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xcaciv.Command.Packages", "src\Xcaciv.Command.Packages\Xcaciv.Command.Packages.csproj", "{571608FD-8942-4B31-A41F-10B71A6A8113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xcaciv.Command.Packages", "src\Xcaciv.Command.Packages\Xcaciv.Command.Packages.csproj", "{571608FD-8942-4B31-A41F-10B71A6A8113}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E73CFD26-26F4-4BD9-906F-133DF4F31954}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Packages.props = src\Directory.Packages.props
+		NuGet.config = NuGet.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

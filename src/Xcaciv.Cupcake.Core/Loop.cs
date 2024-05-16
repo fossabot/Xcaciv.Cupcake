@@ -11,12 +11,12 @@ public class Loop
     public async Task RunAsync(ITextIoContext context)
     {
         await context.SetStatusMessage("Loading Commands").ConfigureAwait(false);
-        var commands = new CommandController();
+        var controller = new CommandController();
 
         try
         {
-            commands.AddPackageDirectory(this.PackageDirectory);
-            commands.LoadCommands();
+            controller.AddPackageDirectory(this.PackageDirectory);
+            controller.LoadCommands();
         }
         catch (Exception ex)
         {
@@ -26,33 +26,34 @@ public class Loop
         await context.SetStatusMessage("Done").ConfigureAwait(false);
 
         await Task.Run(async () => {
-            var command = "";
-            while (!this.ExitCommands.Contains(command, StringComparer.OrdinalIgnoreCase))
+            var inputCommand = "";
+            while (!this.ExitCommands.Contains(inputCommand, StringComparer.OrdinalIgnoreCase))
             {
-                // run command if it was not blank
-                if (String.IsNullOrEmpty(command)) await commands.Run(command, context);
-                // get next command
-                command = await context.PromptForCommand(this.Prompt).ConfigureAwait(false);
+                // run inputCommand if it was not blank
+                if (String.IsNullOrEmpty(inputCommand)) await controller.Run(inputCommand, context);
+                // get next inputCommand
+                inputCommand = await context.PromptForCommand(this.Prompt).ConfigureAwait(false);
 
-                // TODO: figure out how to handle non existing commands: download, compile
+                // TODO: figure out how to handle non existing controller: download, compile
                 // TODO: support NuGet style directory structure
             }
         });
         
     }
     /// <summary>
-    /// run the command loop synchronously using inputFunc to get the commandline
+    /// run the inputCommand loop synchronously using inputFunc to get the commandline
     /// </summary>
     /// <param name="context"></param>
     public void Run(ITextIoContext context)
     {
         context.SetStatusMessage("Loading Commands").Wait();
-        var commands = new CommandController();
+        var controller = new CommandController();
 
         try
         {
-            commands.AddPackageDirectory(this.PackageDirectory);
-            commands.LoadCommands();
+            controller.AddPackageDirectory(this.PackageDirectory);
+            controller.LoadDefaultCommands();
+            controller.LoadCommands();
         }
         catch (Xcaciv.Command.Exceptions.NoPluginsFoundException)
         {
@@ -65,17 +66,13 @@ public class Loop
             throw new Exceptions.LoadingException("Unable to load commands.", ex);
         }
 
-        context.SetStatusMessage("Adding Core Commands").Wait();
-        commands.AddCommand(new Command.Internal());
-        context.SetStatusMessage("Done").Wait();
-
-        var command = "";
-        while (!this.ExitCommands.Contains(command, StringComparer.OrdinalIgnoreCase))
+        var inputCommand = "";
+        while (!this.ExitCommands.Contains(inputCommand, StringComparer.OrdinalIgnoreCase))
         {
-            // run command if it was not blank
-            if (!String.IsNullOrEmpty(command)) commands.Run(command, context).Wait();
-            // get next command
-            command = context.PromptForCommand(this.Prompt).Result;
+            // run inputCommand if it was not blank
+            if (!String.IsNullOrEmpty(inputCommand)) controller.Run(inputCommand, context).Wait();
+            // get next inputCommand
+            inputCommand = context.PromptForCommand(this.Prompt).Result;
         }    
         
     }

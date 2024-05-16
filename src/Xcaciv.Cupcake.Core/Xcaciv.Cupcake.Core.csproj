@@ -10,4 +10,8 @@
     <PackageReference Include="Xcaciv.Command" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Command\" />
+  </ItemGroup>
+
 </Project>

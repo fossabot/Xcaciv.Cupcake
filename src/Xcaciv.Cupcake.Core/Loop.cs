@@ -1,17 +1,78 @@
 ﻿using Xcaciv.Command.Interface;
 using Xcaciv.Command;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Xcaciv.Cupcake.Core;
 
 public class Loop
 {
+    /// <summary>
+    /// designates whether the install command is allowed
+    /// </summary>
+    public bool EnableInstallCommand { get; set; } = true;
+    /// <summary>
+    /// string that is displayed to indicate that the user should enter a command
+    /// </summary>
     public string Prompt { get; set; } = "Ɛ> ";
+    /// <summary>
+    /// commands that will cause the loop to exit
+    /// </summary>
     public List<string> ExitCommands { get; set; } = new List<string>() { "END", "EXIT", "BYEE" };
+    /// <summary>
+    /// directory where packages are loaded from
+    /// </summary>
     public string PackageDirectory { get; set; } = @".\packages";
-    public async Task RunAsync(ITextIoContext context)
+    public ICommandController Controller { get; private set; } = new CommandController();
+    public IEnvironmentContext Environment { get; private set; } = new EnvironmentContext();
+
+    /// <summary>
+    /// run the inputCommand loop synchronously using inputFunc to get the commandline
+    /// </summary>
+    /// <param name="context"></param>
+    public void Run(IIoContext context, ICommandController controller, IEnvironmentContext env)
     {
+        Controller = controller;
+        Environment = env;
+
+        context.SetStatusMessage("Loading Commands").Wait();
+
+        try
+        {
+            controller.EnableDefaultCommands();
+            controller.AddPackageDirectory(this.PackageDirectory);
+            controller.LoadCommands();
+        }
+        catch (Xcaciv.Command.Interface.Exceptions.NoPluginsFoundException)
+        {
+            context.OutputChunk("No Plugins Found. You may want to check out `install --help`").Wait();
+            // TODO: download first plugin and GOTO start again! :D
+            // throw new Exceptions.LoadingException(ex.Message, ex);
+        }
+        catch (Exception ex)
+        {
+            throw new Exceptions.LoadingException("Unable to load commands.", ex);
+        }
+
+        var inputCommand = "";
+        while (!this.ExitCommands.Contains(inputCommand, StringComparer.OrdinalIgnoreCase))
+        {
+            // run inputCommand if it was not blank
+            if (!String.IsNullOrEmpty(inputCommand))
+            {
+                controller.Run(inputCommand, context, env).Wait();
+            }
+            // get next inputCommand
+            inputCommand = context.PromptForCommand(this.Prompt).Result;
+        }    
+        
+    }
+
+    public async Task RunAsync(IIoContext context, ICommandController controller, IEnvironmentContext env)
+    {
+        Controller = controller;
+        Environment = env;
+
         await context.SetStatusMessage("Loading Commands").ConfigureAwait(false);
-        var controller = new CommandController();
 
         try
         {
@@ -30,50 +91,23 @@ public class Loop
             while (!this.ExitCommands.Contains(inputCommand, StringComparer.OrdinalIgnoreCase))
             {
                 // run inputCommand if it was not blank
-                if (String.IsNullOrEmpty(inputCommand)) await controller.Run(inputCommand, context);
+                if (String.IsNullOrEmpty(inputCommand)) await controller.Run(inputCommand, context, env);
                 // get next inputCommand
-                inputCommand = await context.PromptForCommand(this.Prompt).ConfigureAwait(false);
+                inputCommand = await context.PromptForCommand(this.Prompt);
 
                 // TODO: figure out how to handle non existing controller: download, compile
                 // TODO: support NuGet style directory structure
             }
         });
-        
+
     }
-    /// <summary>
-    /// run the inputCommand loop synchronously using inputFunc to get the commandline
-    /// </summary>
-    /// <param name="context"></param>
-    public void Run(ITextIoContext context)
+
+    public Loop RunWithDefaults()
     {
-        context.SetStatusMessage("Loading Commands").Wait();
-        var controller = new CommandController();
 
-        try
-        {
-            controller.AddPackageDirectory(this.PackageDirectory);
-            controller.LoadDefaultCommands();
-            controller.LoadCommands();
-        }
-        catch (Xcaciv.Command.Exceptions.NoPluginsFoundException)
-        {
-            context.SetStatusMessage("No Plugins Found. You may want to check out `install --help`").Wait();
-            // TODO: download first plugin and GOTO start again! :D
-            // throw new Exceptions.LoadingException(ex.Message, ex);
-        }
-        catch (Exception ex)
-        {
-            throw new Exceptions.LoadingException("Unable to load commands.", ex);
-        }
+        Controller.EnableDefaultCommands();
 
-        var inputCommand = "";
-        while (!this.ExitCommands.Contains(inputCommand, StringComparer.OrdinalIgnoreCase))
-        {
-            // run inputCommand if it was not blank
-            if (!String.IsNullOrEmpty(inputCommand)) controller.Run(inputCommand, context).Wait();
-            // get next inputCommand
-            inputCommand = context.PromptForCommand(this.Prompt).Result;
-        }    
-        
+        this.Run(new ConsoleContext("Cupcake Console Context", []), Controller, Environment);
+        return this;
     }
 }

@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Xcaciv.Command.Core" />
+  </ItemGroup>
+
 </Project>

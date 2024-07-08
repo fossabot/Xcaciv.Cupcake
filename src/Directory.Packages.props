@@ -4,7 +4,10 @@
   </PropertyGroup>
   <!-- Applicaiton Versions -->
   <ItemGroup>
-    <PackageVersion Include="Xcaciv.command" Version="1.3.5" />
+    <PackageVersion Include="NuGet.Protocol" Version="6.10.1" />
+    <PackageVersion Include="Xcaciv.command" Version="1.5.2" />
+    <PackageVersion Include="Xcaciv.Command.Core" Version="1.0.9" />
+    <PackageVersion Include="Xcaciv.Command.Interface" Version="1.1.17" />
   </ItemGroup>
   <!-- Unit Test Versions -->
   <ItemGroup>

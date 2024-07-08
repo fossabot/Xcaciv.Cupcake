@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xcaciv.Command" />
+    <Folder Include="Command\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Command\" />
+    <PackageReference Include="Xcaciv.Command" />
   </ItemGroup>
 
 </Project>

@@ -10,43 +10,55 @@ namespace Xcaciv.Command.Packages
 {
     [CommandRoot("Package", "Package commands")]
     [CommandRegister("Search", "install a package")]
-    [CommandParameterOrdered("search string", "String associated to the desired package.", IsRequired = true)]
+    [CommandParameterOrdered("search_terms", "String associated to the desired package.", IsRequired = true)]
+    [CommandParameterNamed("source", "The source to search for the package.")]
+    [CommandParameterNamed("take", "Limit the number of results to return.", DefaultValue = "20")]
+    [CommandParameterNamed("verbosity", "The level of detail to display in the output.", AllowedValues = ["quiet", "normal", "detailed"], DefaultValue = "normal")]
+    [CommandFlag("prerelease", "Include prerelease packages in the search results.")]
     public class SearchCommand : AbstractCommand
     {
         public override string HandleExecution(string[] parameters, IEnvironmentContext env)
         {
-            // return "Not searching " + String.Join(',', parameters);
+            var parameterDictionary = this.ProcessParameters(parameters);
+
             var packageSourceUrl = env.GetValue("PackageSourceUrl");
-            return String.Join("\n", this.SearchNugetFeed(String.Join(',', parameters), packageSourceUrl));
+            // default to nuget.org
+            if (String.IsNullOrEmpty(packageSourceUrl))
+            {
+                packageSourceUrl = "https://api.nuget.org/v3/index.json";
+            }
+
+            List<string> searchResult = [];
+            int limit = int.Parse(parameterDictionary["take"]);
+            bool prerelease = parameterDictionary.ContainsKey("prerelease");
+            
+            var tmpResult = NugetWrapper.FindPackageAsync(parameterDictionary["search_terms"], packageSourceUrl, limit, prerelease).Result;
+
+            switch (parameterDictionary["verbosity"])
+            {
+                case "quiet":
+                    searchResult = tmpResult.Select(p => p.Identity.Id).ToList();
+                    break;
+                case "normal":
+                    searchResult = tmpResult.Select(p => $"{p.Identity.Id} {p.Identity.Version} : {p.Summary}").ToList();
+                    break;
+                case "detailed":
+                    searchResult = tmpResult.Select(p => $"{p.Identity.Id} {p.Identity.Version} ({p.DownloadCount}) : {p.Summary}" +
+                    $"\n  Published:{p.Published}" +
+                    $"\n  Authors:{p.Authors}" +
+                    $"\n  License:{p.LicenseMetadata}" +
+                    $"\n  Vulnerabilities:{p.Vulnerabilities.Count()}" +
+                    $"\n---").ToList();
+                    break;
+            }
+
+            return String.Join("\n", searchResult);
         }
 
         public override string HandlePipedChunk(string pipedChunk, string[] parameters, IEnvironmentContext env)
         {
-            return $"Unsupported search method for {pipedChunk} " + String.Join(',', parameters);
+            return $"Unsupported search method for {pipedChunk} (piped)" + String.Join(',', parameters);
         }
 
-        protected async Task<List<string>> SearchNugetFeed(string searchTerm, string packageSourceUrl)
-        {
-            List<string> packageNames = new List<string>();
-
-            // "https://api.nuget.org/v3/index.json"
-            var nugetSource = new PackageSource(packageSourceUrl);
-            SourceRepository repository = Repository.Factory.GetCoreV3(nugetSource);
-
-            PackageSearchResource resource = await repository.GetResourceAsync<PackageSearchResource>();
-
-            using (var sourceCacheContext = new SourceCacheContext())
-            {
-                SearchFilter searchFilter = new SearchFilter(includePrerelease: false);
-                IEnumerable<IPackageSearchMetadata> packages = await resource.SearchAsync(searchTerm, searchFilter, skip: 0, take: 100, NullLogger.Instance, CancellationToken.None);
-
-                foreach (var package in packages)
-                {
-                    packageNames.Add(package.Identity.Id);
-                }
-            }
-
-            return packageNames;
-        }
     }
 }

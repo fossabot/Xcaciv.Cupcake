@@ -8,6 +8,7 @@ try
 {
     var commandLoop = new Xcaciv.Cupcake.Core.Loop();
     commandLoop.Controller.AddCommand("internal", new InstallCommand());
+    commandLoop.Controller.AddCommand("internal", new SearchCommand());
     commandLoop.RunWithDefaults();
 }
 catch (Exception ex)

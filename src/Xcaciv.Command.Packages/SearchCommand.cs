@@ -28,11 +28,15 @@ namespace Xcaciv.Command.Packages
                 packageSourceUrl = "https://api.nuget.org/v3/index.json";
             }
 
+            // Create a SourceRepository from the packageSourceUrl
+            var packageSource = new PackageSource(packageSourceUrl);
+            var repository = Repository.Factory.GetCoreV3(packageSource);
+
             List<string> searchResult = [];
             int limit = int.Parse(parameterDictionary["take"]);
             bool prerelease = parameterDictionary.ContainsKey("prerelease");
-            
-            var tmpResult = NugetWrapper.FindPackageAsync(parameterDictionary["search_terms"], packageSourceUrl, limit, prerelease).Result;
+
+            var tmpResult = NugetWrapper.FindPackageAsync(parameterDictionary["search_terms"], repository, limit, prerelease).Result;
 
             switch (parameterDictionary["verbosity"])
             {

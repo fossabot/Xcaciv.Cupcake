@@ -10,7 +10,7 @@ using Xcaciv.Command.Interface;
 
 namespace Xcaciv.Cupcake.Core
 {
-    internal class ConsoleContext(string name = "ConsoleIo", string[]? parameters = default, Guid? parentId = default, bool verbose = true) : AbstractTextIo(name, [.. parameters], parentId)
+    public class ConsoleContext(string name = "ConsoleIo", string[]? parameters = default, Guid? parentId = default, bool verbose = true) : AbstractTextIo(name, [.. parameters], parentId)
     {
         /// <summary>
         /// template for progress text output

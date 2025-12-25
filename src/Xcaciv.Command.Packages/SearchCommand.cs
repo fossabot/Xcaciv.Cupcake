@@ -23,9 +23,15 @@ namespace Xcaciv.Command.Packages
 
             var packageSourceUrl = env.GetValue("PackageSourceUrl");
             // default to nuget.org
-            if (String.IsNullOrEmpty(packageSourceUrl))
+            if (string.IsNullOrEmpty(packageSourceUrl))
             {
                 packageSourceUrl = "https://api.nuget.org/v3/index.json";
+            }
+
+            // Enforce HTTPS only for security
+            if (!Uri.TryCreate(packageSourceUrl, UriKind.Absolute, out var packageSourceUri) || packageSourceUri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new InvalidOperationException("Insecure or invalid package source URL. HTTPS is required.");
             }
 
             // Create a SourceRepository from the packageSourceUrl
@@ -33,12 +39,27 @@ namespace Xcaciv.Command.Packages
             var repository = Repository.Factory.GetCoreV3(packageSource);
 
             List<string> searchResult = [];
-            int limit = int.Parse(parameterDictionary["take"]);
+
+            // Clamp limit to prevent abuse
+            var requestedTake = int.Parse(parameterDictionary["take"]);
+            int limit = Math.Clamp(requestedTake, 1, 100);
             bool prerelease = parameterDictionary.ContainsKey("prerelease");
 
-            var tmpResult = NugetWrapper.FindPackageAsync(parameterDictionary["search_terms"], repository, limit, prerelease).Result;
+            // Validate search terms
+            var searchTerms = parameterDictionary["search_terms"].Trim();
+            if (string.IsNullOrWhiteSpace(searchTerms))
+            {
+                return string.Empty;
+            }
+            if (searchTerms.Length > 200)
+            {
+                searchTerms = searchTerms.Substring(0, 200);
+            }
 
-            switch (parameterDictionary["verbosity"])
+            var tmpResult = NugetWrapper.FindPackageAsync(searchTerms, repository, limit, prerelease).Result;
+
+            var verbosity = parameterDictionary.ContainsKey("verbosity") ? parameterDictionary["verbosity"] : "normal";
+            switch (verbosity)
             {
                 case "quiet":
                     searchResult = tmpResult.Select(p => p.Identity.Id).ToList();
@@ -54,14 +75,18 @@ namespace Xcaciv.Command.Packages
                     $"\n  Vulnerabilities:{p.Vulnerabilities.Count()}" +
                     $"\n---").ToList();
                     break;
+                default:
+                    // Fallback to normal if invalid verbosity provided
+                    searchResult = tmpResult.Select(p => $"{p.Identity.Id} {p.Identity.Version} : {p.Summary}").ToList();
+                    break;
             }
 
-            return String.Join("\n", searchResult);
+            return string.Join("\n", searchResult);
         }
 
         public override string HandlePipedChunk(string pipedChunk, string[] parameters, IEnvironmentContext env)
         {
-            return $"Unsupported search method for {pipedChunk} (piped)" + String.Join(',', parameters);
+            return $"Unsupported search method for {pipedChunk} (piped)" + string.Join(',', parameters);
         }
 
     }

@@ -38,8 +38,6 @@ namespace Xcaciv.Command.Packages
             var packageSource = new PackageSource(packageSourceUrl);
             var repository = Repository.Factory.GetCoreV3(packageSource);
 
-            List<string> searchResult = [];
-
             // Clamp limit to prevent abuse
             var requestedTake = int.Parse(parameterDictionary["take"]);
             int limit = Math.Clamp(requestedTake, 1, 100);

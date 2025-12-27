@@ -67,7 +67,6 @@ namespace Xcaciv.Cupcake.Core.Tests
     public class FakeController : ICommandController
     {
         public void AddPackageDirectory(string path) { }
-        public void EnableDefaultCommands() { }
         public void RegisterBuiltInCommands() { }
         public void LoadCommands(string? configPath = null) { }
         public Task Run(string commandLine, IIoContext context, IEnvironmentContext env) => Task.CompletedTask;

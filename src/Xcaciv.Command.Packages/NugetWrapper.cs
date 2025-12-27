@@ -113,7 +113,7 @@ namespace Xcaciv.Command.Packages
             string packageFileName = $"{identity.Id}.{identity.Version}.nupkg";
             string targetFilePath = Path.Combine(targetDirectory, packageFileName);
 
-            DownloadPackageAsync(identity, repository, targetFilePath).Wait();
+            DownloadPackageAsync(identity, repository, targetFilePath).GetAwaiter().GetResult();
 
             PackageIdentity packageIdentity = GetNuspecData(targetFilePath);
             string packageDirectory = Path.Combine(targetDirectory, packageIdentity.Id, packageIdentity.Version.ToString());

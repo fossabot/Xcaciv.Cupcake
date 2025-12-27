@@ -89,7 +89,7 @@ namespace Xcaciv.Cupcake.Core
         /// <returns></returns>
         public override Task SetStatusMessage(string message)
         {
-            if (Verbose == false)
+            if (!Verbose)
             {
                 Debug.WriteLine(message);
                 return Task.CompletedTask;

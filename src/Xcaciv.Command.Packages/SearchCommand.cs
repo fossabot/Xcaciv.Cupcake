@@ -39,7 +39,10 @@ namespace Xcaciv.Command.Packages
             var repository = Repository.Factory.GetCoreV3(packageSource);
 
             // Clamp limit to prevent abuse
-            var requestedTake = int.Parse(parameterDictionary["take"]);
+            if (!parameterDictionary.TryGetValue("take", out var takeValue) || !int.TryParse(takeValue, out var requestedTake))
+            {
+                throw new InvalidOperationException("The 'take' parameter must be a valid integer value.");
+            }
             int limit = Math.Clamp(requestedTake, 1, 100);
             bool prerelease = parameterDictionary.ContainsKey("prerelease");
 

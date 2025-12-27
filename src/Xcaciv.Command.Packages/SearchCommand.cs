@@ -9,7 +9,7 @@ using Xcaciv.Command.Interface.Attributes;
 namespace Xcaciv.Command.Packages
 {
     [CommandRoot("Package", "Package commands")]
-    [CommandRegister("Search", "install a package")]
+    [CommandRegister("Search", "search for a package")]
     [CommandParameterOrdered("search_terms", "String associated to the desired package.", IsRequired = true)]
     [CommandParameterNamed("source", "The source to search for the package.")]
     [CommandParameterNamed("take", "Limit the number of results to return.", DefaultValue = "20")]

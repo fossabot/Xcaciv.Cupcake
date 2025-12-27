@@ -1,6 +1,5 @@
 ﻿using Xcaciv.Command.Interface;
 using Xcaciv.Command;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Xcaciv.Cupcake.Core;
 
@@ -10,21 +9,6 @@ public class Loop
     /// designates whether the install command is allowed
     /// </summary>
     public bool EnableInstallCommand { get; set; } = true;
-    
-    /// <summary>
-    /// Enable certificate validation for secure connections
-    /// </summary>
-    public bool EnableCertificateValidation { get; set; } = true;
-    
-    /// <summary>
-    /// Allowed certificate thumbprints for package sources
-    /// </summary>
-    public List<string> AllowedCertificateThumbprints { get; set; } = new List<string>();
-    
-    /// <summary>
-    /// Enable signature verification for packages
-    /// </summary>
-    public bool EnablePackageSignatureVerification { get; set; } = true;
     
     /// <summary>
     /// string that is displayed to indicate that the user should enter a command

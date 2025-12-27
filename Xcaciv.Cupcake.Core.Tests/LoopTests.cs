@@ -156,28 +156,9 @@ namespace Xcaciv.Cupcake.Core.Tests
         {
             var loop = new Loop();
             Assert.True(loop.EnableInstallCommand);
-            Assert.True(loop.EnableCertificateValidation);
-            Assert.True(loop.EnablePackageSignatureVerification);
-            Assert.NotNull(loop.AllowedCertificateThumbprints);
             Assert.False(string.IsNullOrEmpty(loop.Prompt));
             Assert.NotEmpty(loop.ExitCommands);
             Assert.False(string.IsNullOrEmpty(loop.PackageDirectory));
-        }
-
-        [Fact]
-        public void Loop_SecuritySettings_CanBeConfigured()
-        {
-            var loop = new Loop
-            {
-                EnableCertificateValidation = false,
-                EnablePackageSignatureVerification = false,
-                AllowedCertificateThumbprints = new List<string> { "ABC123" }
-            };
-            
-            Assert.False(loop.EnableCertificateValidation);
-            Assert.False(loop.EnablePackageSignatureVerification);
-            Assert.Single(loop.AllowedCertificateThumbprints);
-            Assert.Equal("ABC123", loop.AllowedCertificateThumbprints[0]);
         }
     }
 }

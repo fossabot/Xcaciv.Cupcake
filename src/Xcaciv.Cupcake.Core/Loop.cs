@@ -10,6 +10,22 @@ public class Loop
     /// designates whether the install command is allowed
     /// </summary>
     public bool EnableInstallCommand { get; set; } = true;
+    
+    /// <summary>
+    /// Enable certificate validation for secure connections
+    /// </summary>
+    public bool EnableCertificateValidation { get; set; } = true;
+    
+    /// <summary>
+    /// Allowed certificate thumbprints for package sources
+    /// </summary>
+    public List<string> AllowedCertificateThumbprints { get; set; } = new List<string>();
+    
+    /// <summary>
+    /// Enable signature verification for packages
+    /// </summary>
+    public bool EnablePackageSignatureVerification { get; set; } = true;
+    
     /// <summary>
     /// string that is displayed to indicate that the user should enter a command
     /// </summary>
@@ -91,7 +107,7 @@ public class Loop
             while (!this.ExitCommands.Contains(inputCommand, StringComparer.OrdinalIgnoreCase))
             {
                 // run inputCommand if it was not blank
-                if (String.IsNullOrEmpty(inputCommand)) await controller.Run(inputCommand, context, env);
+                if (!String.IsNullOrEmpty(inputCommand)) await controller.Run(inputCommand, context, env);
                 // get next inputCommand
                 inputCommand = await context.PromptForCommand(this.Prompt);
 

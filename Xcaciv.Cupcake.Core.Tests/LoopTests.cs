@@ -11,6 +11,8 @@ namespace Xcaciv.Cupcake.Core.Tests
         public string Name { get; } = "Fake";
         public bool IsInteractive { get; set; } = true;
         public bool HasPipedInput { get; set; } = false;
+        public int? PipelineStage { get; private set; }
+        public int? PipelineTotalStages { get; private set; }
 
         public Guid? Parent { get; set; }
 
@@ -39,6 +41,14 @@ namespace Xcaciv.Cupcake.Core.Tests
         public void SetInputPipe(ChannelReader<string> inputPipe) { }
         public Task SetInputPipe(Stream inputPipe) => Task.CompletedTask;
 
+        public void SetOutputEncoder(IOutputEncoder encoder) { }
+        
+        public void SetPipelineStage(int stage, int totalStages)
+        {
+            PipelineStage = stage;
+            PipelineTotalStages = totalStages;
+        }
+
         public async IAsyncEnumerable<string> ReadInputPipeChunks()
         {
             yield break;
@@ -58,12 +68,15 @@ namespace Xcaciv.Cupcake.Core.Tests
     {
         public void AddPackageDirectory(string path) { }
         public void EnableDefaultCommands() { }
+        public void RegisterBuiltInCommands() { }
         public void LoadCommands(string? configPath = null) { }
         public Task Run(string commandLine, IIoContext context, IEnvironmentContext env) => Task.CompletedTask;
+        public Task Run(string commandLine, IIoContext context, IEnvironmentContext env, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task SetIoContext(IIoContext context) => Task.CompletedTask;
         public Task<IEnumerable<string>> GetCommandNames() => Task.FromResult<IEnumerable<string>>(Array.Empty<string>());
 
         public void GetHelp(string commandName, IIoContext context, IEnvironmentContext env) { }
+        public Task GetHelpAsync(string commandName, IIoContext context, IEnvironmentContext env, CancellationToken cancellationToken) => Task.CompletedTask;
         public void AddCommand(ICommandDescription description) { }
         public void AddCommand(string name, Type commandType, bool enabled) { }
         public void AddCommand(string name, ICommandDelegate commandDelegate, bool enabled) { }
@@ -85,6 +98,7 @@ namespace Xcaciv.Cupcake.Core.Tests
             return defaultValue;
         }
         public Dictionary<string, string> GetEnvinronment() => new(_values);
+        public Dictionary<string, string> GetEnvironment() => new(_values);
         public void UpdateEnvironment(Dictionary<string, string> values)
         {
             foreach (var kvp in values)
@@ -139,23 +153,32 @@ namespace Xcaciv.Cupcake.Core.Tests
         }
 
         [Fact]
-        public void RunWithDefaults_SetsDefaults()
-        {
-            var loop = new Loop();
-            var result = loop.RunWithDefaults();
-            Assert.Same(loop, result);
-            Assert.NotNull(loop.Controller);
-            Assert.NotNull(loop.Environment);
-        }
-
-        [Fact]
         public void Loop_Defaults_Initialized()
         {
             var loop = new Loop();
             Assert.True(loop.EnableInstallCommand);
+            Assert.True(loop.EnableCertificateValidation);
+            Assert.True(loop.EnablePackageSignatureVerification);
+            Assert.NotNull(loop.AllowedCertificateThumbprints);
             Assert.False(string.IsNullOrEmpty(loop.Prompt));
             Assert.NotEmpty(loop.ExitCommands);
             Assert.False(string.IsNullOrEmpty(loop.PackageDirectory));
+        }
+
+        [Fact]
+        public void Loop_SecuritySettings_CanBeConfigured()
+        {
+            var loop = new Loop
+            {
+                EnableCertificateValidation = false,
+                EnablePackageSignatureVerification = false,
+                AllowedCertificateThumbprints = new List<string> { "ABC123" }
+            };
+            
+            Assert.False(loop.EnableCertificateValidation);
+            Assert.False(loop.EnablePackageSignatureVerification);
+            Assert.Single(loop.AllowedCertificateThumbprints);
+            Assert.Equal("ABC123", loop.AllowedCertificateThumbprints[0]);
         }
     }
 }

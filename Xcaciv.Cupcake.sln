@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31919.166
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11312.210 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xcaciv.Cupcake", "src\Xcaciv.Cupcake\Xcaciv.Cupcake.csproj", "{774FEC08-21BA-41AE-98A1-3772C7279F67}"
 EndProject
@@ -111,6 +111,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{73A122DA-6AFA-4A1B-9FF6-599B4AE09D5B} = {91B626A2-9842-4EC6-A3F3-6B9C2FFEB12A}
+		{2DC88E02-B211-4BA1-B423-7BD45CFC9CAD} = {91B626A2-9842-4EC6-A3F3-6B9C2FFEB12A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AF3FAF2D-4F75-40DA-86B8-2EACBA119E9D}
